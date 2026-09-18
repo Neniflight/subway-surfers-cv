@@ -87,10 +87,26 @@ def main():
             # detect landmarkers for each frame in a video
             result = landmarker.detect_for_video(mp_image, timestamp_ms)
 
-            # Draw the skeleton directly onto the BGR frame we display
-            # check if a pose landmarker exist
-
             frame = draw_landmarks_on_image(frame, result)
+
+            # Step 3: normalizing for distance from the camera
+            person = result.pose_landmarks[0]
+            left_shoulder = person[11]
+            right_shoulder = person[12]
+            left_torso = person[23]
+            right_torso = person[24]
+
+            sh_x = (left_shoulder.x + right_shoulder.x) / 2
+            sh_y = (left_shoulder.y + right_shoulder.y) / 2
+
+            hip_x = (left_torso.x + right_torso.x) / 2
+            hip_y = (left_torso.y + right_torso.y) / 2
+
+            body_x = (sh_x + hip_x) / 2
+            body_y = (sh_y + hip_y) / 2
+
+            torso_size = ((sh_x - hip_x) ** 2 + (sh_y - hip_y) ** 2) ** 0.5
+
 
             # Display the resulting frame
             cv2.putText(frame, fps_text, position, font, font_scale, color, thickness, cv2.LINE_AA)
